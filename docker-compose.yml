@@ -1,0 +1,37 @@
+---
+services:
+  sut:
+    build:
+      context: ./sut
+    depends_on:
+      - localstack
+
+  glue_jupyter:
+    command: "/home/jupyter/jupyter_start.sh"
+    container_name: glue_jupyter
+    image: "amazon/aws-glue-libs:glue_libs_1.0.0_image_01"
+    ports:
+      - "8888:8888"
+    volumes:
+      - "~/.aws:/root/.aws:ro"
+      - ".:/app"
+
+  localstack:
+    container_name: localstack
+    environment:
+      DEBUG: 1
+      SERVICES: "s3"
+      PORT_WEB_UI: "${PORT_WEB_UI- }"
+    image: "localstack/localstack:0.12.5"
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+
+  site-packager:
+    build:
+      context: site-packager
+    volumes:
+      - "./dist:/mnt/dist"
+
+version: "3"
